@@ -1,6 +1,20 @@
 {
+  "name": "@vansergen/tor",
+  "description": "Tor docker image",
   "version": "1.0.0",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vansergen/tor.git"
+  },
+  "keywords": [
+    "tor",
+    "onion"
+  ],
+  "bugs": {
+    "url": "https://github.com/vansergen/tor/issues"
+  },
+  "homepage": "https://github.com/vansergen/tor#readme",
   "scripts": {
     "commitlint": "commitlint --verbose --from=$( git rev-list --max-parents=0 $( git rev-parse --abbrev-ref HEAD ) )",
     "install:clean": "npm install",
