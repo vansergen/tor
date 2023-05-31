@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.1](https://github.com/vansergen/tor/compare/v1.0.0...v1.0.1) (2023-05-31)
+
+### Build System
+
+- remove `linux/s390x` support ([79828f6](https://github.com/vansergen/tor/commit/79828f6dc4d35638fda91ad8f11158b8fdca84b1))
+
 ## 1.0.0 (2023-05-31)
 
 ### Features
