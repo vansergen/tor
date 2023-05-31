@@ -4,26 +4,26 @@ A simple docker container to access the [Tor](https://www.torproject.org/) netwo
 
 ## Usage
 
-### SOCKS proxy
+### SOCKS proxy example
 
-Start the service
+1. Start the service
 
 ```sh
 docker run --publish 9050:9050 --detach ghcr.io/vansergen/tor
 ```
 
-Test the connection
+2. Test the connection
 
 ```sh
 curl --socks5-hostname localhost:9050 https://api64.ipify.org
 ```
 
-### Hidden service
+### Hidden service example
 
-1. Generate an address
+1. Generate 2 addresses
 
 ```sh
-docker run --volume onions:/root/mkp224o ghcr.io/vansergen/mkp224o -B -n 1 t
+docker run --volume onions:/root/mkp224o ghcr.io/vansergen/mkp224o -B -n 2 t
 ```
 
 Output example:
@@ -36,30 +36,43 @@ filters:
 in total, 1 filter
 using 4 threads
 tidf4ursf562swhyvfx3wx755wwre6j573mvnynp6ztqapognm75iqid.onion
+tc3tqrmytj3t2nh77q6fhcmsetegniq6u5t4vtwuku4jx7tayun4bwyd.onion
 waiting for threads to finish... done.
 ```
 
-2. Create a configuration file `torrc.d/tidf4ursf562swhyvfx3wx755wwre6j573mvnynp6ztqapognm75iqid.conf`
+2. Create configuration files
 
-```apacheconf
-HiddenServiceDir /var/lib/tor/tidf4ursf562swhyvfx3wx755wwre6j573mvnynp6ztqapognm75iqid.onion
-HiddenServicePort 80 traefik:80 # <- Your proxy here
-HiddenServicePort 443 traefik:443 # <- Your proxy here
-```
+   - `torrc.d/tidf4ursf562swhyvfx3wx755wwre6j573mvnynp6ztqapognm75iqid.conf`
+
+   ```apacheconf
+   HiddenServiceDir /var/lib/tor/tidf4ursf562swhyvfx3wx755wwre6j573mvnynp6ztqapognm75iqid.onion
+   HiddenServicePort 80 traefik:80 # <- Your proxy here
+   HiddenServicePort 443 traefik:443 # <- Your proxy here
+   ```
+
+   - `torrc.d/tc3tqrmytj3t2nh77q6fhcmsetegniq6u5t4vtwuku4jx7tayun4bwyd.conf`
+
+   ```apacheconf
+   HiddenServiceDir /var/lib/tor/tc3tqrmytj3t2nh77q6fhcmsetegniq6u5t4vtwuku4jx7tayun4bwyd.onion
+   HiddenServicePort 20022 nginx:22 # <- Your proxy here
+   ```
 
 3. Start the service
 
 ```sh
-docker run --volume onions:/var/lib/tor --volume ./torrc.d:/etc/tor/torrc.d --detach ghcr.io/vansergen/tor
+docker run --volume onions:/var/lib/tor --volume ${PWD}/torrc.d:/etc/tor/torrc.d --detach ghcr.io/vansergen/tor
 ```
 
-3.1. Docker Compose example
+#### Docker Compose example
+
+- [`compose.yaml`](https://docs.docker.com/compose/compose-file/03-compose-file/):
 
 ```yaml
 services:
   traefik:
     image: traefik:v3.0
     container_name: traefik
+    # More traefik options
     networks:
       - tor
 

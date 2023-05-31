@@ -25,6 +25,9 @@ jobs:
       - name: commitlint
         run: npm run commitlint
 
+      - name: build
+        run: docker build -t test:latest .
+
   release:
     needs: [test]
 
