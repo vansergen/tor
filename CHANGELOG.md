@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.2](https://github.com/vansergen/tor/compare/v1.0.1...v1.0.2) (2023-05-31)
+
+### Build System
+
+- add the `/var/lib/tor` volume ([6b3e877](https://github.com/vansergen/tor/commit/6b3e8770cf275b7bd628eca781ab3714ac85af99))
+
 ## [1.0.1](https://github.com/vansergen/tor/compare/v1.0.0...v1.0.1) (2023-05-31)
 
 ### Build System
