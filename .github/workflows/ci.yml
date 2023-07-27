@@ -29,6 +29,8 @@ jobs:
         run: docker build -t test:latest .
 
   release:
+    if: ${{ github.ref == 'refs/heads/main' }}
+
     needs: [test]
 
     runs-on: ubuntu-latest
