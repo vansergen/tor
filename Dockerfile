@@ -2,7 +2,7 @@ ARG ALPINE_VERSION=3.18.3
 
 FROM alpine:${ALPINE_VERSION}
 
-ARG TOR_VERSION=0.4.7.13-r2
+ARG TOR_VERSION=0.4.8.5-r0
 
 RUN apk add --no-cache "tor>=${TOR_VERSION}"
 
