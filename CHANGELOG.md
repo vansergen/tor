@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/vansergen/tor/compare/v1.0.2...v1.0.3) (2023-09-13)
+
+### Dependencies
+
+- add `tor@0.4.8.5-r0` ([5e1d031](https://github.com/vansergen/tor/commit/5e1d0318bf858aa54158059f2532bc97fcf9ddfd))
+- use `alpine:3.18.3` ([2271a10](https://github.com/vansergen/tor/commit/2271a10c382eb71f35b63c788a5417ef2770cdef))
+
 ## [1.0.2](https://github.com/vansergen/tor/compare/v1.0.1...v1.0.2) (2023-05-31)
 
 ### Build System
