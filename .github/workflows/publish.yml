@@ -47,7 +47,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       # https://github.com/marketplace/actions/build-and-push-docker-images
-      - uses: docker/build-push-action@v4
+      - uses: docker/build-push-action@v5
         id: build
         with:
           context: .
