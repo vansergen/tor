@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.4](https://github.com/vansergen/tor/compare/v1.0.3...v1.0.4) (2023-11-15)
+
+### Dependencies
+
+- install `tor-0.4.8.9-r0` ([6d2f871](https://github.com/vansergen/tor/commit/6d2f871a8732a0436407c435c9f9015b252b15f5))
+
 ## [1.0.3](https://github.com/vansergen/tor/compare/v1.0.2...v1.0.3) (2023-09-13)
 
 ### Dependencies
