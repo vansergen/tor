@@ -61,7 +61,7 @@ jobs:
           digest="${{ steps.build.outputs.digest }}"
           touch "/tmp/digests/${digest#sha256:}"
       # https://github.com/marketplace/actions/upload-a-build-artifact
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: digests
           path: /tmp/digests/*
