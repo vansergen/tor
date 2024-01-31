@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.5](https://github.com/vansergen/tor/compare/v1.0.4...v1.0.5) (2024-01-31)
+
+### Dependencies
+
+- bump `tor` to `v0.4.8.10-r0` ([9b64973](https://github.com/vansergen/tor/commit/9b649739b85e2211f3edca4fc4dbe391a19b6134))
+- use the `alpine:3.19.1` image ([edce336](https://github.com/vansergen/tor/commit/edce3362d99d3dcf0064857affc781ab2a1205f4))
+
 ## [1.0.4](https://github.com/vansergen/tor/compare/v1.0.3...v1.0.4) (2023-11-15)
 
 ### Dependencies
