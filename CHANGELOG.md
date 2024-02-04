@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.0](https://github.com/vansergen/tor/compare/v1.0.5...v1.1.0) (2024-02-04)
+
+### Features
+
+- add `IPv6` to `SOCKSPolicy` ([9874dd0](https://github.com/vansergen/tor/commit/9874dd071c7a616f3bc65c2194ae52dafc1a4500))
+
 ## [1.0.5](https://github.com/vansergen/tor/compare/v1.0.4...v1.0.5) (2024-01-31)
 
 ### Dependencies
