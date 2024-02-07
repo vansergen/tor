@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.0](https://github.com/vansergen/tor/compare/v1.1.0...v1.2.0) (2024-02-07)
+
+### Features
+
+- add `obfs4` bridges support ([419f743](https://github.com/vansergen/tor/commit/419f74398d252e0bba0f547e93993f5b74604076))
+
 ## [1.1.0](https://github.com/vansergen/tor/compare/v1.0.5...v1.1.0) (2024-02-04)
 
 ### Features
