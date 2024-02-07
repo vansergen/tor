@@ -18,6 +18,28 @@ docker run --publish 9050:9050 --detach ghcr.io/vansergen/tor
 curl --socks5-hostname localhost:9050 https://api64.ipify.org
 ```
 
+#### `obfs4` bridges
+
+0. Add bridges to `./bridges.conf`
+
+```
+UseBridges 1
+Bridge obfs4 <IP>:<PORT> <FOOTPRINT> cert=<CERT> iat-mode=0
+Bridge obfs4 <IP>:<PORT> <FOOTPRINT> cert=<CERT> iat-mode=2
+Bridge obfs4 <IP>:<PORT> <FOOTPRINT> cert=<CERT> iat-mode=0
+Bridge obfs4 <IP>:<PORT> <FOOTPRINT> cert=<CERT> iat-mode=0
+```
+
+1. Start the service
+
+```sh
+docker run \
+  --publish 9050:9050 \
+  --volume ./bridges.conf:/etc/tor/torrc.d/bridges.conf \
+  --detach \
+  ghcr.io/vansergen/tor
+```
+
 ### Hidden service example
 
 1. Generate 2 addresses
