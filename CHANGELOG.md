@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.1](https://github.com/vansergen/tor/compare/v1.2.0...v1.2.1) (2024-03-21)
+
+### Dependencies
+
+- bump `lyrebird` to `0.1.0-r3` ([baa4dfc](https://github.com/vansergen/tor/commit/baa4dfccaf60482fdfd3d1c28263f22587fa12e3))
+
 ## [1.2.0](https://github.com/vansergen/tor/compare/v1.1.0...v1.2.0) (2024-02-07)
 
 ### Features
