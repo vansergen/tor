@@ -2,8 +2,8 @@ ARG ALPINE_VERSION=3.19.1
 
 FROM alpine:${ALPINE_VERSION}
 
-ARG TOR_VERSION=0.4.8.10-r0
-ARG LYREBIRD_VERSION=0.1.0-r3
+ARG TOR_VERSION=0.4.8.11-r0
+ARG LYREBIRD_VERSION=0.1.0-r4
 ARG LYREBIRD_REPOSITORY=http://dl-cdn.alpinelinux.org/alpine/edge/testing
 
 RUN apk add --no-cache tor=${TOR_VERSION} && \
