@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/vansergen/tor/compare/v1.2.1...v1.2.2) (2024-04-28)
+
+### Build System
+
+- bump `lyrebird` to `0.1.0-r4` ([debff60](https://github.com/vansergen/tor/commit/debff6067fcdf4562570d4213255482a9d8d906d))
+- bump `tor` to `0.4.8.11-r0` ([5a602f9](https://github.com/vansergen/tor/commit/5a602f9d2e4c3e5e461de327c55088ae1ba60ac8))
+
 ## [1.2.1](https://github.com/vansergen/tor/compare/v1.2.0...v1.2.1) (2024-03-21)
 
 ### Dependencies
