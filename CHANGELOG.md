@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.2.3](https://github.com/vansergen/tor/compare/v1.2.2...v1.2.3) (2024-06-21)
+
+### Build System
+
+- bump `tor` and `lyrebird` to the latest version ([0ce00ee](https://github.com/vansergen/tor/commit/0ce00ee13916bae6a7b1b84cd1e7639f61a6aba1))
+
+### Dependencies
+
+- `npm update` ([04b1db5](https://github.com/vansergen/tor/commit/04b1db5943c848add1ae479f0b3c1a453f63182c))
+
 ## [1.2.2](https://github.com/vansergen/tor/compare/v1.2.1...v1.2.2) (2024-04-28)
 
 ### Build System
