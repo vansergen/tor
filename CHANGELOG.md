@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.2.4](https://github.com/vansergen/tor/compare/v1.2.3...v1.2.4) (2024-07-17)
+
+### Build System
+
+- use the `alpine:3.20.1` image ([9702896](https://github.com/vansergen/tor/commit/97028966fc9feb882f345f5941e5d3670778225e))
+
+### Dependencies
+
+- bump `lyrebird` to `v0.2.0-r2` ([19097f8](https://github.com/vansergen/tor/commit/19097f85898aaf8b1960651b53a863ce5b2c578a))
+
 ## [1.2.3](https://github.com/vansergen/tor/compare/v1.2.2...v1.2.3) (2024-06-21)
 
 ### Build System
