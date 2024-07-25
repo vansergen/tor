@@ -27,7 +27,7 @@
   "devDependencies": {
     "@binden/commitlint-config": "^2.1.0",
     "@binden/semantic-release-config": "^3.0.0",
-    "husky": "^9.1.0",
+    "husky": "^9.1.2",
     "lint-staged": "^15.2.7",
     "prettier": "^3.3.3"
   }
