@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.5](https://github.com/vansergen/tor/compare/v1.2.4...v1.2.5) (2024-09-10)
+
+### Build System
+
+- bump alpine to v3.20.3 ([55920d5](https://github.com/vansergen/tor/commit/55920d515b07a5c053012aa7b194dace590e036b))
+
 ## [1.2.4](https://github.com/vansergen/tor/compare/v1.2.3...v1.2.4) (2024-07-17)
 
 ### Build System
