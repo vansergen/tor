@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.8](https://github.com/vansergen/tor/compare/v1.2.7...v1.2.8) (2025-04-24)
+
+### Build System
+
+- add `/etc/tor` to volumes ([9f78db4](https://github.com/vansergen/tor/commit/9f78db4a74d082730de49a2aa91857781258cbf8))
+
 ## [1.2.7](https://github.com/vansergen/tor/compare/v1.2.6...v1.2.7) (2025-04-24)
 
 ### Build System
