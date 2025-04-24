@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.7](https://github.com/vansergen/tor/compare/v1.2.6...v1.2.7) (2025-04-24)
+
+### Build System
+
+- bump dependencies ([ad8edf1](https://github.com/vansergen/tor/commit/ad8edf151009465f6c5317497c9086bfb7de5845))
+
 ## [1.2.6](https://github.com/vansergen/tor/compare/v1.2.5...v1.2.6) (2024-12-07)
 
 ### Build System
