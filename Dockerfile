@@ -12,7 +12,7 @@ RUN apk add --no-cache tor=${TOR_VERSION} && \
 
 COPY ./torrc.conf /etc/tor/torrc
 
-VOLUME /var/lib/tor
+VOLUME /var/lib/tor /etc/tor
 
 EXPOSE 9050
 
