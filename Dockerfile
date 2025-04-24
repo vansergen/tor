@@ -1,10 +1,10 @@
-ARG ALPINE_VERSION=3.21.0
+ARG ALPINE_VERSION=3.21.3
 
 FROM alpine:${ALPINE_VERSION}
 
-ARG TOR_VERSION=0.4.8.13-r0
-ARG LYREBIRD_VERSION=0.2.0-r2
-ARG LYREBIRD_REPOSITORY=http://dl-cdn.alpinelinux.org/alpine/edge/testing
+ARG TOR_VERSION=0.4.8.16-r0
+ARG LYREBIRD_VERSION=0.6.0-r1
+ARG LYREBIRD_REPOSITORY=https://dl-cdn.alpinelinux.org/alpine/edge/community
 
 RUN apk add --no-cache tor=${TOR_VERSION} && \
   apk add --no-cache lyrebird=${LYREBIRD_VERSION} --repository ${LYREBIRD_REPOSITORY} && \
