@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.10](https://github.com/vansergen/tor/compare/v1.2.9...v1.2.10) (2025-04-27)
+
+### Build System
+
+- update ci actions configuration ([7cccf50](https://github.com/vansergen/tor/commit/7cccf50942a48ecff53363eba6520a1657133ad4))
+
 ## [1.2.9](https://github.com/vansergen/tor/compare/v1.2.8...v1.2.9) (2025-04-27)
 
 ### Build System
