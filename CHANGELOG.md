@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.11](https://github.com/vansergen/tor/compare/v1.2.10...v1.2.11) (2025-06-28)
+
+### Build System
+
+- bump alpine version to 3.22.0 ([e143cbf](https://github.com/vansergen/tor/commit/e143cbf6944fb1195a5115c7cced42e0e8c6e81c))
+- bump lyrebird version to 0.6.1 ([a12131d](https://github.com/vansergen/tor/commit/a12131dd0209988fb5a46a03e6d390aab6528729))
+
 ## [1.2.10](https://github.com/vansergen/tor/compare/v1.2.9...v1.2.10) (2025-04-27)
 
 ### Build System
