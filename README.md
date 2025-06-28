@@ -63,7 +63,6 @@ waiting for threads to finish... done.
 ```
 
 2. Create configuration files
-
    - `torrc.d/tidf4ursf562swhyvfx3wx755wwre6j573mvnynp6ztqapognm75iqid.conf`
 
    ```apacheconf
