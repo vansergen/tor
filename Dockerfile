@@ -1,13 +1,12 @@
-ARG ALPINE_VERSION=3.22.0
+ARG ALPINE_VERSION=3.23.3
 
 FROM alpine:${ALPINE_VERSION}
 
-ARG TOR_VERSION=0.4.8.16-r0
-ARG LYREBIRD_VERSION=0.6.1-r1
-ARG LYREBIRD_REPOSITORY=https://dl-cdn.alpinelinux.org/alpine/edge/community
+ARG TOR_VERSION=0.4.9.6-r0
+ARG LYREBIRD_VERSION=0.7.0-r5
 
 RUN apk add --no-cache tor=${TOR_VERSION} && \
-  apk add --no-cache lyrebird=${LYREBIRD_VERSION} --repository ${LYREBIRD_REPOSITORY} && \
+  apk add --no-cache lyrebird=${LYREBIRD_VERSION} && \
   mkdir /etc/tor/torrc.d
 
 COPY ./torrc.conf /etc/tor/torrc
