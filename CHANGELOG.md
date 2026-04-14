@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.12](https://github.com/vansergen/tor/compare/v1.2.11...v1.2.12) (2026-04-14)
+
+### Bug Fixes
+
+- update tor to `v0.4.9.6` ([0f75f28](https://github.com/vansergen/tor/commit/0f75f2873567e335431b7df2a746414d25a32698))
+
 ## [1.2.11](https://github.com/vansergen/tor/compare/v1.2.10...v1.2.11) (2025-06-28)
 
 ### Build System
