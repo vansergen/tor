@@ -19,7 +19,8 @@ fail() {
 # and directories, with names made of letters, digits, '.', '_' and '-'
 check_tree() {
   bad=$(find "$1" -mindepth 1 \( \( ! -type f ! -type d \) \
-    -o \( -type f -links +1 \) -o -name '*[!A-Za-z0-9._-]*' \) -print)
+    -o \( -type f -links +1 \) -o -name '*[!A-Za-z0-9._-]*' \) -print) ||
+    fail "cannot check $1, nothing was changed"
   [ -z "$bad" ] || fail "unsupported files in $1: $bad"
 }
 
@@ -31,9 +32,12 @@ manifest() {
       find . -type d -exec stat -c 'd %u %g %a %n' {} + &&
       find . -type f -exec sh -c '
         for f; do
-          s=$(stat -c "%u %g %a %s" "$f") &&
-            h=$(sha256sum < "$f" | cut -d " " -f 1) &&
-            printf "f %s %s %s\n" "$s" "$h" "$f" || exit 1
+          s=$(stat -c "%u %g %a %s" "$f") || exit 1
+          h=$(sha256sum < "$f") || exit 1
+          h=${h%% *}
+          [ "${#h}" -eq 64 ] || exit 1
+          case $h in *[!0-9a-f]*) exit 1 ;; esac
+          printf "f %s %s %s\n" "$s" "$h" "$f"
         done' sh {} +
   ) > "$2.unsorted" && sort "$2.unsorted" > "$2"
 }
@@ -63,7 +67,8 @@ backup() {
   mkdir "$BACKUP/data"
   copy_contents "$DATA" "$BACKUP/data"
   copy_root "$DATA" "$BACKUP/data"
-  same_tree "$DATA" "$BACKUP/data" || fail "the backup in $BACKUP differs from $DATA"
+  same_tree "$DATA" "$BACKUP/data" ||
+    fail "cannot verify the backup in $BACKUP against $DATA, it is not marked complete"
   # Marks the backup as usable for restore
   touch "$BACKUP/complete"
   echo "tor-migrate: backed up $DATA into $BACKUP"
@@ -84,9 +89,11 @@ import() {
   # The lock file of the old container
   rm -f "$tmp/state/lock"
 
+  (cd "$tmp/state" && find . -mindepth 1) > "$tmp/paths" ||
+    fail "cannot list the state to import, nothing was changed"
   conflicts=$(
     cd "$tmp/state"
-    find . -mindepth 1 | while IFS= read -r f; do
+    while IFS= read -r f; do
       t="$DATA/${f#./}"
       if [ -e "$t" ] || [ -L "$t" ]; then
         if [ -d "$f" ] && [ -d "$t" ] && [ ! -L "$t" ]; then
@@ -94,7 +101,7 @@ import() {
         fi
         echo "$t"
       fi
-    done
+    done < "$tmp/paths"
   )
   [ -z "$conflicts" ] || fail "already in $DATA, nothing was changed: $conflicts"
 
@@ -115,7 +122,7 @@ restore() {
   mkdir "$tmp/data"
   copy_contents "$BACKUP/data" "$tmp/data"
   copy_root "$BACKUP/data" "$tmp/data"
-  same_tree "$BACKUP/data" "$tmp/data" || fail "cannot read the backup, nothing was changed"
+  same_tree "$BACKUP/data" "$tmp/data" || fail "cannot verify the backup, nothing was changed"
 
   # Not atomic from here on
   if ! { find "$DATA" -mindepth 1 -delete && copy_contents "$tmp/data" "$DATA" &&

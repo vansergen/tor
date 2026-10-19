@@ -28,7 +28,7 @@ WORK=$(mktemp -d)
 cleanup() {
   "$ENGINE" rm -f "$ID-v1" "$ID-v2" "$ID-base" "$ID-run" > /dev/null 2>&1 || true
   "$ENGINE" volume rm -f "$VOLUME" "$BACKUP_VOLUME" "$ID-empty" "$ID-incomplete" \
-    > /dev/null 2>&1 || true
+    "$ID-fake" "$ID-hashfail" > /dev/null 2>&1 || true
   rm -rf "$BACKUP_DIR" "$WORK"
 }
 trap cleanup EXIT
@@ -139,6 +139,33 @@ expect_refusal "a backup without the complete mark" "not a complete backup" "$VO
   --volume "$ID-incomplete":/backup:ro --volume "$VOLUME":/var/lib/tor
 expect_refusal "a backup into a used volume" "is not empty" "$BACKUP_VOLUME" backup \
   --volume "$VOLUME":/var/lib/tor:ro --volume "$BACKUP_VOLUME":/backup
+
+log "refuse to back up or restore when hashing fails"
+# A sha256sum that always fails, first in PATH
+"$ENGINE" volume create "$ID-fake" > /dev/null
+on_volume "$ID-fake" 'printf "#!/bin/sh\nexit 1\n" > /v/sha256sum && chmod 755 /v/sha256sum'
+FAKE_PATH=/fake:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# The backup copies the data before it verifies it, so its volume changes,
+# but it must not be marked complete
+"$ENGINE" volume create "$ID-hashfail" > /dev/null
+before=$(snapshot "$VOLUME")
+if "$ENGINE" run --rm --network none --user root --entrypoint tor-migrate \
+  --volume "$ID-fake":/fake:ro --env "PATH=$FAKE_PATH" --volume "$VOLUME":/var/lib/tor:ro \
+  --volume "$ID-hashfail":/backup "$IMAGE" backup > "$WORK/out" 2>&1; then
+  cat "$WORK/out" >&2
+  fail "a backup with a failing sha256sum: accepted"
+fi
+grep -qF "cannot verify the backup" "$WORK/out" || {
+  cat "$WORK/out" >&2
+  fail "a backup with a failing sha256sum: refused for another reason"
+}
+on_volume "$ID-hashfail" 'test ! -e /v/complete' ||
+  fail "a backup with a failing sha256sum is marked complete"
+[ "$(snapshot "$VOLUME")" = "$before" ] || fail "a backup with a failing sha256sum changed $VOLUME"
+echo "refused a backup with a failing sha256sum: $(sed -n 1p "$WORK/out")"
+expect_refusal "a restore with a failing sha256sum" "cannot verify the backup" "$VOLUME" restore \
+  --volume "$ID-fake":/fake:ro --env "PATH=$FAKE_PATH" \
+  --volume "$BACKUP_VOLUME":/backup:ro --volume "$VOLUME":/var/lib/tor
 
 log "import the state"
 "$ENGINE" run --rm --network none --user root --entrypoint tor-migrate \
