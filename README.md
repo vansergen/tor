@@ -118,3 +118,15 @@ networks:
   tor:
     name: tor
 ```
+
+## Upgrading from v1
+
+Since v2 `tor` runs as the unprivileged `tor` user (uid `100`, gid `101`) instead of `root`.
+
+- Volumes created by v1 contain files owned by `root`. Change the owner once before starting v2:
+
+```sh
+docker run --rm --user root --entrypoint chown --volume onions:/var/lib/tor ghcr.io/vansergen/tor -R tor:tor /var/lib/tor
+```
+
+- Files mounted from the host (e.g. `torrc.d/*.conf`, `bridges.conf`) must be readable by uid `100`.
