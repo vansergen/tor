@@ -1,0 +1,147 @@
+#!/bin/sh
+# Migrate the tor state of a v1 container. Runs as root.
+#
+#   tor-migrate backup   copy /var/lib/tor (read-only) into the empty /backup
+#   tor-migrate import   import the v1 state (/root/.tor) from /import (read-only)
+#   tor-migrate restore  replace /var/lib/tor with the backup in /backup (read-only)
+set -eu
+
+DATA=/var/lib/tor
+BACKUP=/backup
+IMPORT=/import
+
+fail() {
+  echo "tor-migrate: $*" >&2
+  exit 1
+}
+
+# Fails unless the tree contains only regular files without other hard links
+# and directories, with names made of letters, digits, '.', '_' and '-'
+check_tree() {
+  bad=$(find "$1" -mindepth 1 \( \( ! -type f ! -type d \) \
+    -o \( -type f -links +1 \) -o -name '*[!A-Za-z0-9._-]*' \) -print) ||
+    fail "cannot check $1, nothing was changed"
+  [ -z "$bad" ] || fail "unsupported files in $1: $bad"
+}
+
+# Writes the tree of a directory to a file: the type, owner and mode of every
+# entry, and the size and hash of regular files, with paths relative to it
+manifest() {
+  (
+    cd "$1" &&
+      find . -type d -exec stat -c 'd %u %g %a %n' {} + &&
+      find . -type f -exec sh -c '
+        for f; do
+          s=$(stat -c "%u %g %a %s" "$f") || exit 1
+          h=$(sha256sum < "$f") || exit 1
+          h=${h%% *}
+          [ "${#h}" -eq 64 ] || exit 1
+          case $h in *[!0-9a-f]*) exit 1 ;; esac
+          printf "f %s %s %s\n" "$s" "$h" "$f"
+        done' sh {} +
+  ) > "$2.unsorted" && sort "$2.unsorted" > "$2"
+}
+
+# Copies the contents of a directory into an existing one
+copy_contents() {
+  find "$1" -mindepth 1 -maxdepth 1 -exec sh -c '
+    dst=$1
+    shift
+    cp -a "$@" "$dst/"' sh "$2" {} +
+}
+
+# Gives a directory the owner and mode of another one
+copy_root() {
+  chown "$(stat -c %u:%g "$1")" "$2" && chmod "$(stat -c %a "$1")" "$2"
+}
+
+same_tree() {
+  manifest "$1" "$tmp/manifest.1" && manifest "$2" "$tmp/manifest.2" &&
+    cmp -s "$tmp/manifest.1" "$tmp/manifest.2"
+}
+
+backup() {
+  [ -d "$BACKUP" ] || fail "mount the backup volume at $BACKUP"
+  [ -z "$(ls -A "$BACKUP")" ] || fail "$BACKUP is not empty"
+  check_tree "$DATA"
+  mkdir "$BACKUP/data"
+  copy_contents "$DATA" "$BACKUP/data"
+  copy_root "$DATA" "$BACKUP/data"
+  same_tree "$DATA" "$BACKUP/data" ||
+    fail "cannot verify the backup in $BACKUP against $DATA, it is not marked complete"
+  # Marks the backup as usable for restore
+  touch "$BACKUP/complete"
+  echo "tor-migrate: backed up $DATA into $BACKUP"
+}
+
+import() {
+  { [ -d "$IMPORT" ] && [ ! -L "$IMPORT" ]; } ||
+    fail "mount the exported /root/.tor directory at $IMPORT"
+  check_tree "$IMPORT"
+  { [ -f "$IMPORT/state" ] && [ -s "$IMPORT/state" ]; } || fail "$IMPORT has no tor state file"
+
+  # Work on a private copy, so that the checks hold for what is copied
+  mkdir "$tmp/state"
+  copy_contents "$IMPORT" "$tmp/state"
+  check_tree "$tmp/state"
+  { [ -f "$tmp/state/state" ] && [ -s "$tmp/state/state" ]; } ||
+    fail "$IMPORT has no tor state file"
+  # The lock file of the old container
+  rm -f "$tmp/state/lock"
+
+  (cd "$tmp/state" && find . -mindepth 1) > "$tmp/paths" ||
+    fail "cannot list the state to import, nothing was changed"
+  conflicts=$(
+    cd "$tmp/state"
+    while IFS= read -r f; do
+      t="$DATA/${f#./}"
+      if [ -e "$t" ] || [ -L "$t" ]; then
+        if [ -d "$f" ] && [ -d "$t" ] && [ ! -L "$t" ]; then
+          continue
+        fi
+        echo "$t"
+      fi
+    done < "$tmp/paths"
+  )
+  [ -z "$conflicts" ] || fail "already in $DATA, nothing was changed: $conflicts"
+
+  # Not atomic from here on
+  if ! { copy_contents "$tmp/state" "$DATA" && chown -R tor:tor "$DATA" &&
+    chmod 700 "$DATA"; }; then
+    fail "the import failed after it changed $DATA; restore it with: tor-migrate restore"
+  fi
+  echo "tor-migrate: imported the tor state into $DATA"
+}
+
+restore() {
+  { [ -f "$BACKUP/complete" ] && [ -d "$BACKUP/data" ] && [ ! -L "$BACKUP/data" ]; } ||
+    fail "$BACKUP is not a complete backup, nothing was changed"
+  check_tree "$BACKUP/data"
+
+  # Read the whole backup before anything is deleted
+  mkdir "$tmp/data"
+  copy_contents "$BACKUP/data" "$tmp/data"
+  copy_root "$BACKUP/data" "$tmp/data"
+  same_tree "$BACKUP/data" "$tmp/data" || fail "cannot verify the backup, nothing was changed"
+
+  # Not atomic from here on
+  if ! { find "$DATA" -mindepth 1 -delete && copy_contents "$tmp/data" "$DATA" &&
+    copy_root "$tmp/data" "$DATA"; }; then
+    fail "the restore failed after it changed $DATA; run it again"
+  fi
+  same_tree "$BACKUP/data" "$DATA" || fail "$DATA differs from the backup after the restore"
+  echo "tor-migrate: restored $DATA from $BACKUP"
+}
+
+[ "$(id -u)" -eq 0 ] || fail "run as root (--user root)"
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+trap 'exit 1' HUP INT TERM
+
+case "${1:-}" in
+  backup) backup ;;
+  import) import ;;
+  restore) restore ;;
+  *) fail "usage: tor-migrate backup|import|restore" ;;
+esac

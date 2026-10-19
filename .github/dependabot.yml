@@ -15,6 +15,16 @@ updates:
       prefix: dependencies
       prefix-development: devDependencies
 
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: daily
+    labels:
+      - dependabot
+      - docker
+    commit-message:
+      prefix: build
+
   - package-ecosystem: github-actions
     directory: /
     schedule:

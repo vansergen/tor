@@ -1,17 +1,15 @@
-ARG ALPINE_VERSION=3.23.3
+FROM alpine:3.24.2
 
-FROM alpine:${ALPINE_VERSION}
-
-ARG TOR_VERSION=0.4.9.6-r0
-ARG LYREBIRD_VERSION=0.7.0-r5
-
-RUN apk add --no-cache tor=${TOR_VERSION} && \
-  apk add --no-cache lyrebird=${LYREBIRD_VERSION} && \
-  mkdir /etc/tor/torrc.d
+RUN apk add --no-cache tor lyrebird && \
+  mkdir /etc/tor/torrc.d && \
+  chmod 700 /var/lib/tor
 
 COPY ./torrc.conf /etc/tor/torrc
+COPY ./bin/tor-migrate /usr/local/bin/tor-migrate
 
-VOLUME /var/lib/tor /etc/tor
+USER tor
+
+VOLUME /var/lib/tor
 
 EXPOSE 9050
 
