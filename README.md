@@ -4,12 +4,18 @@ A simple docker container to access the [Tor](https://www.torproject.org/) netwo
 
 ## Usage
 
+Set the image once, the commands below use it:
+
+```sh
+TOR_IMAGE=ghcr.io/vansergen/tor:2
+```
+
 ### SOCKS proxy example
 
 1. Start the service
 
 ```sh
-docker run --publish 9050:9050 --detach ghcr.io/vansergen/tor
+docker run --name tor --publish 9050:9050 --volume tor:/var/lib/tor --detach "$TOR_IMAGE"
 ```
 
 2. Test the connection
@@ -34,10 +40,12 @@ Bridge obfs4 <IP>:<PORT> <FOOTPRINT> cert=<CERT> iat-mode=0
 
 ```sh
 docker run \
+  --name tor \
   --publish 9050:9050 \
+  --volume tor:/var/lib/tor \
   --volume ./bridges.conf:/etc/tor/torrc.d/bridges.conf \
   --detach \
-  ghcr.io/vansergen/tor
+  "$TOR_IMAGE"
 ```
 
 ### Hidden service example
@@ -81,7 +89,7 @@ waiting for threads to finish... done.
 3. Start the service
 
 ```sh
-docker run --volume onions:/var/lib/tor --volume ${PWD}/torrc.d:/etc/tor/torrc.d --detach ghcr.io/vansergen/tor
+docker run --volume onions:/var/lib/tor --volume ${PWD}/torrc.d:/etc/tor/torrc.d --detach "$TOR_IMAGE"
 ```
 
 #### Docker Compose example
@@ -98,7 +106,7 @@ services:
       - tor
 
   tor:
-    image: ghcr.io/vansergen/tor:latest
+    image: ghcr.io/vansergen/tor:2
     container_name: tor
     volumes:
       # Configuration files for hidden services
@@ -126,7 +134,7 @@ Since v2 `tor` runs as the unprivileged `tor` user (uid `100`, gid `101`) instea
 - Volumes created by v1 contain files owned by `root`. Change the owner once before starting v2:
 
 ```sh
-docker run --rm --user root --entrypoint chown --volume onions:/var/lib/tor ghcr.io/vansergen/tor -R tor:tor /var/lib/tor
+docker run --rm --user root --entrypoint chown --volume onions:/var/lib/tor "$TOR_IMAGE" -R tor:tor /var/lib/tor
 ```
 
 - Files mounted from the host (e.g. `torrc.d/*.conf`, `bridges.conf`) must be readable by uid `100`.
