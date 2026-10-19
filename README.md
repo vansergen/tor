@@ -129,13 +129,73 @@ networks:
 
 ## Upgrading from v1
 
-Since v2 `tor` runs as the unprivileged `tor` user (uid `100`, gid `101`) instead of `root`.
-
-- Volumes created by v1 contain files owned by `root`. Change the owner once before starting v2:
-
-```sh
-docker run --rm --user root --entrypoint chown --volume onions:/var/lib/tor "$TOR_IMAGE" -R tor:tor /var/lib/tor
-```
+Since v2 `tor` runs as the unprivileged `tor` user (uid `100`, gid `101`) instead of `root` and keeps its state in `/var/lib/tor`. v1 kept the client state (e.g. the guards) in `/root/.tor`, outside of the volume.
 
 - Files mounted from the host (e.g. `torrc.d/*.conf`, `bridges.conf`) must be readable by uid `100`.
 - `/etc/tor` is no longer declared as a volume. Mount `/etc/tor/torrc.d` (or `/etc/tor`) explicitly if you need to persist the configuration.
+
+### Migrating a v1 container
+
+The `tor-migrate` helper of the image backs up the volume, imports the state of v1 and changes the owner of the files. Keep the old container and the backups until v2 works.
+
+0. Set the name of the existing v1 container and the volume mounted at its `/var/lib/tor`. They come from your v1 installation, not from the examples above.
+
+```sh
+CONTAINER=tor
+VOLUME=onions
+```
+
+Check the volume with:
+
+```sh
+docker inspect -f '{{range .Mounts}}{{if eq .Destination "/var/lib/tor"}}{{.Name}}{{end}}{{end}}' "$CONTAINER"
+```
+
+1. Stop the old container and export its state into a new private directory (it contains the guards):
+
+```sh
+docker stop "$CONTAINER"
+umask 077
+BACKUP_DIR=$(mktemp -d "$HOME/tor-migration.XXXXXX")
+docker cp "$CONTAINER":/root/.tor "$BACKUP_DIR/tor-state"
+```
+
+2. Back up the volume into a new volume (it contains the private keys of your onion services):
+
+```sh
+BACKUP_VOLUME="$VOLUME-backup-$(date +%Y%m%d%H%M%S)"
+docker volume create "$BACKUP_VOLUME"
+docker run --rm --user root --entrypoint tor-migrate --volume "$VOLUME":/var/lib/tor:ro --volume "$BACKUP_VOLUME":/backup "$TOR_IMAGE" backup
+```
+
+3. Import the state. On hosts with SELinux add `,z` to the options of the `/import` volume.
+
+```sh
+docker run --rm --user root --entrypoint tor-migrate --volume "$VOLUME":/var/lib/tor --volume "$BACKUP_DIR/tor-state":/import:ro "$TOR_IMAGE" import
+```
+
+The import refuses unexpected files (anything but regular files and directories with plain names, or without the tor `state` file) and files that already exist in the volume, without changing it. If it fails after it started copying, restore the volume from the backup:
+
+```sh
+docker run --rm --user root --entrypoint tor-migrate --volume "$BACKUP_VOLUME":/backup:ro --volume "$VOLUME":/var/lib/tor "$TOR_IMAGE" restore
+```
+
+4. Rename the old container and start v2 with the same volume and options:
+
+```sh
+docker rename "$CONTAINER" "$CONTAINER-v1"
+```
+
+5. Once v2 works, remove the old container and the backups:
+
+```sh
+docker rm "$CONTAINER-v1"
+docker volume rm "$BACKUP_VOLUME"
+rm -rf "$BACKUP_DIR"
+```
+
+Without the old container (and its state), only change the owner of the files in the volume:
+
+```sh
+docker run --rm --user root --entrypoint chown --volume "$VOLUME":/var/lib/tor "$TOR_IMAGE" -R tor:tor /var/lib/tor
+```

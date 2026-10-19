@@ -5,6 +5,7 @@ RUN apk add --no-cache tor lyrebird && \
   chmod 700 /var/lib/tor
 
 COPY ./torrc.conf /etc/tor/torrc
+COPY ./bin/tor-migrate /usr/local/bin/tor-migrate
 
 USER tor
 
