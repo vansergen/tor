@@ -11,7 +11,7 @@ COPY ./torrc.conf /etc/tor/torrc
 
 USER tor
 
-VOLUME /var/lib/tor /etc/tor
+VOLUME /var/lib/tor
 
 EXPOSE 9050
 

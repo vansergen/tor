@@ -130,3 +130,4 @@ docker run --rm --user root --entrypoint chown --volume onions:/var/lib/tor ghcr
 ```
 
 - Files mounted from the host (e.g. `torrc.d/*.conf`, `bridges.conf`) must be readable by uid `100`.
+- `/etc/tor` is no longer declared as a volume. Mount `/etc/tor/torrc.d` (or `/etc/tor`) explicitly if you need to persist the configuration.
