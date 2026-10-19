@@ -70,7 +70,13 @@ tc3tqrmytj3t2nh77q6fhcmsetegniq6u5t4vtwuku4jx7tayun4bwyd.onion
 waiting for threads to finish... done.
 ```
 
-2. Create configuration files
+2. Give the generated keys to the `tor` user of the image
+
+```sh
+docker run --rm --user root --entrypoint chown --volume onions:/var/lib/tor "$TOR_IMAGE" -R tor:tor /var/lib/tor
+```
+
+3. Create configuration files
    - `torrc.d/tidf4ursf562swhyvfx3wx755wwre6j573mvnynp6ztqapognm75iqid.conf`
 
    ```apacheconf
@@ -86,7 +92,7 @@ waiting for threads to finish... done.
    HiddenServicePort 20022 nginx:22 # <- Your proxy here
    ```
 
-3. Start the service
+4. Start the service
 
 ```sh
 docker run --volume onions:/var/lib/tor --volume ${PWD}/torrc.d:/etc/tor/torrc.d --detach "$TOR_IMAGE"
@@ -125,6 +131,11 @@ services:
 networks:
   tor:
     name: tor
+
+volumes:
+  # Created by `mkp224o` above
+  onions:
+    external: true
 ```
 
 ## Upgrading from v1
