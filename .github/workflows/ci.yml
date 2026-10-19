@@ -86,11 +86,14 @@ jobs:
         env:
           GPG_KEY: ${{ secrets.GPG_KEY }}
 
+      # Git calls this as its gpg program; the passphrase goes through a file
+      # descriptor instead of the command line
       - name: Add the custom gpg executable
         run: |
-          rm -rf /tmp/gpg.sh
-          echo '#!/bin/sh' >> /tmp/gpg.sh
-          echo 'gpg --batch --pinentry-mode=loopback --passphrase "$GPG_KEY_PASSPHRASE" "$@"' >> /tmp/gpg.sh
+          cat > /tmp/gpg.sh <<'EOF'
+          #!/usr/bin/env bash
+          exec gpg --batch --pinentry-mode=loopback --passphrase-fd 3 "$@" 3<<< "$GPG_KEY_PASSPHRASE"
+          EOF
           chmod +x /tmp/gpg.sh
 
       - name: Setup git
