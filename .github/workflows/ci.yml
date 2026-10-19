@@ -33,13 +33,17 @@ jobs:
       - name: commitlint
         run: npm run commitlint
 
+      - name: ShellCheck
+        run: shellcheck -x bin/tor-migrate test/*.sh
+
       - name: build
         run: docker build -t test:latest .
 
-      - name: smoke test
-        run: |
-          docker run --rm test:latest --verify-config
-          docker run --rm --entrypoint lyrebird test:latest -version
+      - name: test the image
+        run: test/image.sh test:latest
+
+      - name: test the migration from v1
+        run: test/migration.sh test:latest
 
   release:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
