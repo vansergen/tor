@@ -25,9 +25,19 @@ on_volume() {
 # Lists the entries of a volume with their type, owner, mode, size and hash
 snapshot() {
   on_volume "$1" '
+    set -o pipefail
     cd /v
     find . -exec stat -c "%F %u %g %a %s %n" {} + | sort
     find . -type f -exec sha256sum {} + | sort'
+}
+
+# Prints the logs of a container, fails if they cannot be read
+logs() {
+  "$ENGINE" logs "$1" 2>&1 || fail "cannot read the logs of $1"
+}
+
+running() {
+  "$ENGINE" inspect -f '{{.State.Running}}' "$1" || fail "cannot inspect $1"
 }
 
 # Waits up to 30 seconds until tor in a container has finished its
@@ -35,18 +45,22 @@ snapshot() {
 # not need to reach the network.
 wait_ready() {
   i=0
-  until "$ENGINE" logs "$1" 2>&1 | grep -q 'Bootstrapped 0% (starting): Starting'; do
+  while :; do
+    out=$(logs "$1")
+    case $out in *'Bootstrapped 0% (starting): Starting'*) break ;; esac
     i=$((i + 1))
-    if [ "$i" -gt 30 ] || [ "$("$ENGINE" inspect -f '{{.State.Running}}' "$1")" != true ]; then
-      "$ENGINE" logs "$1" >&2 || true
+    if [ "$i" -gt 30 ] || [ "$(running "$1")" != true ]; then
+      printf '%s\n' "$out" >&2
       fail "$1 did not finish its initialization"
     fi
     sleep 1
   done
   sleep 5
-  if [ "$("$ENGINE" inspect -f '{{.State.Running}}' "$1")" != true ] ||
-    "$ENGINE" logs "$1" 2>&1 | grep -q '\[err\]'; then
-    "$ENGINE" logs "$1" >&2 || true
+  out=$(logs "$1")
+  state=$(running "$1")
+  case $out in *'[err]'*) state=error ;; esac
+  if [ "$state" != true ]; then
+    printf '%s\n' "$out" >&2
     fail "$1 failed after its initialization"
   fi
 }

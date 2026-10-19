@@ -28,7 +28,7 @@ WORK=$(mktemp -d)
 cleanup() {
   "$ENGINE" rm -f "$ID-v1" "$ID-v2" "$ID-base" "$ID-run" > /dev/null 2>&1 || true
   "$ENGINE" volume rm -f "$VOLUME" "$BACKUP_VOLUME" "$ID-empty" "$ID-incomplete" \
-    "$ID-fake" "$ID-hashfail" > /dev/null 2>&1 || true
+    "$ID-fake" "$ID-hashfail" "$ID-fifo" > /dev/null 2>&1 || true
   rm -rf "$BACKUP_DIR" "$WORK"
 }
 trap cleanup EXIT
@@ -56,8 +56,16 @@ expect_refusal() {
     cat "$WORK/out" >&2
     fail "$name: refused for another reason"
   }
-  unexpected=$("$ENGINE" diff "$ID-run" | grep -vxF -f "$WORK/expected" || true)
+  changes=$("$ENGINE" diff "$ID-run") || fail "$name: cannot list the changes of the container"
   "$ENGINE" rm "$ID-run" > /dev/null
+  unexpected=
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    grep -qxF -- "$line" "$WORK/expected" || unexpected="$unexpected
+$line"
+  done << EOF
+$changes
+EOF
   [ -z "$unexpected" ] || fail "$name: changed the container: $unexpected"
   [ "$(snapshot "$vol")" = "$before" ] || fail "$name: changed the volume $vol"
   echo "refused $name: $(sed -n 1p "$WORK/out")"
@@ -114,10 +122,13 @@ d=$(bad hardlink state)
 ln "$d/state" "$d/link"
 expect_refusal "a hard link" "unsupported files" "$VOLUME" import \
   --volume "$VOLUME":/var/lib/tor --volume "$d":/import:ro
-d=$(bad fifo state)
-mkfifo "$d/fifo"
+# A FIFO of the host may not be usable through a bind mount (e.g. with
+# Podman on macOS), so make it in a volume
+"$ENGINE" volume create "$ID-fifo" > /dev/null
+"$ENGINE" run --rm --network none --user root --entrypoint sh --volume "$ID-fifo":/v \
+  --volume "$BACKUP_DIR/tor-state":/export:ro "$IMAGE" -euc 'cp /export/state /v/state && mkfifo /v/fifo'
 expect_refusal "a FIFO" "unsupported files" "$VOLUME" import \
-  --volume "$VOLUME":/var/lib/tor --volume "$d":/import:ro
+  --volume "$VOLUME":/var/lib/tor --volume "$ID-fifo":/import:ro
 d=$(bad newline state)
 echo x > "$d/$(printf 'new\nline')"
 expect_refusal "a name with a newline" "unsupported files" "$VOLUME" import \

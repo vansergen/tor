@@ -30,7 +30,8 @@ trap cleanup EXIT
 trap 'exit 1' HUP INT TERM
 
 log "versions"
-"$ENGINE" run --rm --network none --entrypoint tor "$IMAGE" --version | sed -n 1p
+version=$("$ENGINE" run --rm --network none --entrypoint tor "$IMAGE" --version)
+printf '%s\n' "$version" | sed -n 1p
 "$ENGINE" run --rm --network none --entrypoint lyrebird "$IMAGE" -version
 
 log "the bundled configuration is valid"
