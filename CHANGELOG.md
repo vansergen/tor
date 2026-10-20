@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.1](https://github.com/vansergen/tor/compare/v2.0.0...v2.0.1) (2026-10-20)
+
+### Build System
+
+- publish the image when the release fails after tagging ([6ab49ac](https://github.com/vansergen/tor/commit/6ab49ac9f59c88fb5eb2f495742f1f3ea7ec4043))
+
 ## [2.0.0](https://github.com/vansergen/tor/compare/v1.2.12...v2.0.0) (2026-10-20)
 
 ### ⚠ BREAKING CHANGES
