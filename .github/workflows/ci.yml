@@ -69,9 +69,16 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    # semantic-release pushes the release commit and tag
+    # semantic-release pushes the release commit and tag with the token that
+    # actions/checkout keeps in the git config, creates the GitHub release and
+    # comments on the released issues and pull requests
     permissions:
       contents: write
+      issues: write
+      pull-requests: write
+
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
 
     steps:
       - uses: actions/checkout@v7
@@ -110,7 +117,27 @@ jobs:
       - name: Release
         run: npx semantic-release
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_KEY_PASSPHRASE: ${{ secrets.GPG_KEY_PASSPHRASE }}
           GIT_COMMITTER_EMAIL: ${{ vars.GIT_COMMITTER_EMAIL }}
           GIT_COMMITTER_NAME: ${{ vars.GIT_COMMITTER_NAME }}
+
+      # The release commit is tagged when a new version was released
+      - name: Get the released tag
+        id: tag
+        run: echo "tag=$(git tag --points-at HEAD 'v*')" >> "$GITHUB_OUTPUT"
+
+  # A release created with GITHUB_TOKEN does not trigger other workflows, so
+  # publish the image from here
+  publish:
+    needs: [release]
+
+    if: ${{ needs.release.outputs.tag != '' }}
+
+    permissions:
+      contents: read
+      packages: write
+
+    uses: ./.github/workflows/publish.yml
+    with:
+      tag: ${{ needs.release.outputs.tag }}
