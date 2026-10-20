@@ -7,16 +7,10 @@
 - `/etc/tor` is no longer declared as a volume. Mount
   `/etc/tor/torrc.d` (or `/etc/tor`) explicitly to persist configuration.
 
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_013VZkvRdtXi3X8HjCNPWTTL
-
 - `tor` runs as the `tor` user (uid 100). Volumes created
   by v1 contain files owned by `root` and must be migrated once with
   `chown -R tor:tor /var/lib/tor` (see README). Files mounted from the
   host must be readable by uid 100.
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_013VZkvRdtXi3X8HjCNPWTTL
 
 ### Features
 
