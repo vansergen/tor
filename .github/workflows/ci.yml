@@ -122,17 +122,24 @@ jobs:
           GIT_COMMITTER_EMAIL: ${{ vars.GIT_COMMITTER_EMAIL }}
           GIT_COMMITTER_NAME: ${{ vars.GIT_COMMITTER_NAME }}
 
-      # The release commit is tagged when a new version was released
+      # The release commit is tagged when a new version was released. The tag
+      # may already be pushed when a later step of semantic-release fails (as
+      # the push of its notes for 2.0.0), so publish it anyway
       - name: Get the released tag
         id: tag
-        run: echo "tag=$(git tag --points-at HEAD 'v*')" >> "$GITHUB_OUTPUT"
+        if: ${{ !cancelled() }}
+        run: |
+          tag=$(git tag --points-at HEAD 'v*')
+          if [ -n "$tag" ] && git ls-remote --exit-code --tags origin "refs/tags/$tag" > /dev/null; then
+            echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          fi
 
   # A release created with GITHUB_TOKEN does not trigger other workflows, so
   # publish the image from here
   publish:
     needs: [release]
 
-    if: ${{ needs.release.outputs.tag != '' }}
+    if: ${{ !cancelled() && needs.release.outputs.tag != '' }}
 
     permissions:
       contents: read
