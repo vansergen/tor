@@ -1,5 +1,40 @@
 # Changelog
 
+## [2.0.0](https://github.com/vansergen/tor/compare/v1.2.12...v2.0.0) (2026-10-20)
+
+### ⚠ BREAKING CHANGES
+
+- `/etc/tor` is no longer declared as a volume. Mount
+  `/etc/tor/torrc.d` (or `/etc/tor`) explicitly to persist configuration.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_013VZkvRdtXi3X8HjCNPWTTL
+
+- `tor` runs as the `tor` user (uid 100). Volumes created
+  by v1 contain files owned by `root` and must be migrated once with
+  `chown -R tor:tor /var/lib/tor` (see README). Files mounted from the
+  host must be readable by uid 100.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_013VZkvRdtXi3X8HjCNPWTTL
+
+### Features
+
+- add a helper to migrate the tor state of v1 ([f3ca175](https://github.com/vansergen/tor/commit/f3ca17572e010553220693b1f8d251636a0949cc))
+- keep the tor state in `/var/lib/tor` ([1a6f999](https://github.com/vansergen/tor/commit/1a6f999d814ece82a39c30e4b1e7a504dfbd2b7b))
+- run tor as the non-root `tor` user ([d58d051](https://github.com/vansergen/tor/commit/d58d051b3110bd5538d4aff053fbb0b9baf9ff87))
+
+### Bug Fixes
+
+- stop tor-migrate when a command of a check fails ([054a070](https://github.com/vansergen/tor/commit/054a070acafb6582e4fc80bff1738262bb3e46b7))
+- update tor to `v0.4.9.14` ([5ed10ee](https://github.com/vansergen/tor/commit/5ed10ee81cc6923168d5292c297bb53e152a1653))
+
+### Build System
+
+- build the image from an allowlist of files ([39c2fdc](https://github.com/vansergen/tor/commit/39c2fdc181fb5ecbe2f637449732de47e2d4a8e3))
+- stop declaring `/etc/tor` as a volume ([b772872](https://github.com/vansergen/tor/commit/b7728723781d202d44fe5501b23808a9bede9a2f))
+- stop pinning the apk package versions ([b97a511](https://github.com/vansergen/tor/commit/b97a51198a207c3f6fb4a58f284614a95e6a08d2))
+
 ## [1.2.12](https://github.com/vansergen/tor/compare/v1.2.11...v1.2.12) (2026-04-14)
 
 ### Bug Fixes
