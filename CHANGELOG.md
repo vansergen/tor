@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.2](https://github.com/vansergen/tor/compare/v2.0.1...v2.0.2) (2026-10-30)
+
+### Build System
+
+- bump alpine from 3.24.2 to 3.24.3 ([d70c8c7](https://github.com/vansergen/tor/commit/d70c8c72d0ca663f53b859598416389c19959f2a))
+
 ## [2.0.1](https://github.com/vansergen/tor/compare/v2.0.0...v2.0.1) (2026-10-20)
 
 ### Build System
